@@ -13,7 +13,8 @@ def download_document(api_key, document_id=""):
         data = requests.get(url + "&api_key=" + api_key + '&rpp=1')
     else:
         url = "https://api.data.gov:443/regulations/v3/document.json?"
-        data = requests.get(url + "&api_key=" + api_key + "&documentId=" + document_id)
+        data = requests.get(url + "&api_key=" + api_key + "&documentId="
+                            + document_id)
     if data.status_code == 403:
         raise regulations_api_errors.InvalidApiKeyException
     if data.status_code == 429:
