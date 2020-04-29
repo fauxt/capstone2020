@@ -81,7 +81,7 @@ def find_download_data(api_key, job, job_id):
     data_json = {'folder_name': job['folder_name'],
                  'file_name': job['file_name'],
                  'file_type': job['file_type'],
-                 'data': data.text
+                 'data': data.content
                  }
     results = package_downloads(data_json, CLIENT_ID, job_id)
     return results

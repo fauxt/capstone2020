@@ -30,8 +30,15 @@ def do_job(api_key):
 
     LOGGER.info("Packaging Successful")
     LOGGER.info("Posting data to server")
-    requests.post('http://capstone.cs.moravian.edu/return_result',
-                  json=results)
+    if job['job_type'] == 'download':
+        file = [('document', (results['data'][0]['file_name'],
+                              results['data'][0]['data'],
+                              results['data'][0]['folder_name']))]
+        requests.post('http://capstone.cs.moravian.edu/return_result',
+                      files=file)
+    else:
+        requests.post('http://capstone.cs.moravian.edu/return_result',
+                      json=results)
     LOGGER.info("Data successfully posted to server!")
 
 
