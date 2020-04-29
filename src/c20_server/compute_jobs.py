@@ -12,7 +12,6 @@ def get_number_of_docs(response):
     '''
     Return total number of records
     '''
-    LOGGER.info('Getting the total number of records from regulations.gov')
     number_of_docs = response.get("totalNumRecords")
     return number_of_docs
 
