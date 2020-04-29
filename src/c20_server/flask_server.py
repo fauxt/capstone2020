@@ -22,15 +22,16 @@ def create_app(job_manager, data_repository):
         LOGGER.info('Requesting Job From Job Queue...')
         requested_job = job_manager.request_job(User(100))
         job = job_to_json(requested_job)
-        LOGGER.info('Sending Job to client...')
+        LOGGER.info('Sending Job to user...')
         return job
 
     @app.route('/return_result', methods=['POST'])
     def _return_result():
-        LOGGER.info('Receiving Data from Client...')
+        LOGGER.info('Receiving Data from user...')
         client_data = request.json
         print(client_data)
         if client_data is None:
+            LOGGER.error('No Data received to be saved')
             return {}, 400
 
         update_job_manager(job_manager, client_data)
@@ -62,6 +63,7 @@ def update_job_manager(job_manager, client_data):
 
 def save_data(data_repository, list_of_data_dicts):
     data_items = DataExtractor.extract(list_of_data_dicts)
+    LOGGER.info('Saving the data into the disk...')
     for data_item in data_items:
         data_repository.save_data(data_item.folder_name,
                                   data_item.file_name, data_item.contents)
