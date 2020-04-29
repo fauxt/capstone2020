@@ -9,13 +9,22 @@ from c20_server.data_extractor import DataExtractor
 from c20_server.data_repository import DataRepository
 from c20_server.database import Database
 from c20_server.server_logger import LOGGER
+from c20_server.user_manager import UserManager
 
 
-def create_app(job_manager, data_repository):
+def create_app(job_manager, data_repository, database):
     app = Flask(__name__)
 
     # Note: endpoint names begin with an "_" so that Pylint does not complain
     # about unused functions.
+
+    @app.route('/get_user_id')
+    def _get_client_id():
+        user_manager = UserManager(database)
+        user_id = user_manager.get_new_user_id()
+        LOGGER.info('Sending user_id: %s', user_id)
+        user_id_json = {'user_id': user_id}
+        return user_id_json
 
     @app.route('/get_job')
     def _get_job():
@@ -82,7 +91,7 @@ def launch():
     job_manager = JobManager(database)
     job_manager.add_job(DocumentsJob('1', 0, '12/28/19', '1/23/20'))
     data_repository = DataRepository(base_path='data')
-    app = create_app(job_manager, data_repository)
+    app = create_app(job_manager, data_repository, database)
     app.run(host='0.0.0.0')
 
 

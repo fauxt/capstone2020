@@ -1,35 +1,36 @@
 import json
 from unittest.mock import patch
-import fakeredis
 import pytest
 from c20_server.flask_server import create_app, redis_connect
 from c20_server.mock_job_manager import MockJobManager
 from c20_server.spy_data_repository import SpyDataRepository
 from c20_server.job import DocumentsJob
-
-
-def make_redis_database():
-    r_database = fakeredis.FakeRedis()
-    r_database.flushall()
-    return r_database
+from c20_server.database import MockDatabase
 
 
 @pytest.fixture(name='job_manager')
 def job_manager_fixture():
-    r_database = make_redis_database()
+    r_database = MockDatabase(True).fake_redis
     job_manager = MockJobManager(r_database)
     return job_manager
 
 
 @pytest.fixture(name='client')
 def client_fixture(job_manager):
-    app = create_app(job_manager, SpyDataRepository())
+    r_database = MockDatabase(True).fake_redis
+    app = create_app(job_manager, SpyDataRepository(), r_database)
     app.config['TESTING'] = True
     return app.test_client()
 
 
-def test_return_result_success(job_manager):
-    app = create_app(job_manager, SpyDataRepository())
+def test_initialize_user_ids(client):
+    result = client.get('/get_user_id')
+    json_ = json.loads(result.data)
+    assert json_['user_id'] == 'User1'
+
+
+def test_return_result_success(job_manager, client):
+    app = create_app(job_manager, SpyDataRepository(), MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
 
@@ -69,7 +70,7 @@ def test_single_job_return(job_manager):
     job_manager.add_job(DocumentsJob(job_id=1, page_offset=0,
                                      start_date='03-01-2020',
                                      end_date='04-01-2020'))
-    app = create_app(job_manager, SpyDataRepository())
+    app = create_app(job_manager, SpyDataRepository(), MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
     result = client.get('/get_job')
@@ -82,7 +83,7 @@ def test_single_job_return(job_manager):
 
 
 def test_none_job_return_when_no_job(job_manager):
-    app = create_app(job_manager, SpyDataRepository())
+    app = create_app(job_manager, SpyDataRepository(), MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
     result = client.get('/get_job')
@@ -95,7 +96,7 @@ def test_report_one_job_as_failure(job_manager):
     job_manager.add_job(DocumentsJob(job_id=1, page_offset=0,
                                      start_date='03-01-2020',
                                      end_date='04-01-2020'))
-    app = create_app(job_manager, SpyDataRepository())
+    app = create_app(job_manager, SpyDataRepository(), MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
     assert job_manager.num_unassigned() == 1
@@ -117,7 +118,7 @@ def test_report_one_job_as_failure(job_manager):
 
 def test_store_single_data_item(job_manager):
     data_repository_spy = SpyDataRepository()
-    app = create_app(job_manager, data_repository_spy)
+    app = create_app(job_manager, data_repository_spy, MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
 
@@ -146,7 +147,7 @@ def test_store_single_data_item(job_manager):
 
 def test_store_multiple_data_items(job_manager):
     data_repository_spy = SpyDataRepository()
-    app = create_app(job_manager, data_repository_spy)
+    app = create_app(job_manager, data_repository_spy, MockDatabase(True))
     app.config['TESTING'] = True
     client = app.test_client()
 

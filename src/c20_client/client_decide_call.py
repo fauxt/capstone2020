@@ -45,7 +45,7 @@ def find_documents_data(api_key, job, job_id):
         job["page_offset"],
         job["start_date"],
         job["end_date"])
-    LOGGER.info("Packaging documents data")
+    LOGGER.info("Job#%s: Packaging documents...", str(job_id))
     results = package_documents(data, CLIENT_ID, job_id)
     return results
 
@@ -56,7 +56,7 @@ def find_document_data(api_key, job, job_id):
         api_key,
         job['document_id']
     )
-    LOGGER.info("Packaging document data")
+    LOGGER.info("Job#%s: Packaging document...", str(job_id))
     results = package_document(data, CLIENT_ID, job_id)
     return results
 
@@ -67,7 +67,7 @@ def find_docket_data(api_key, job, job_id):
         api_key,
         job['docket_id']
     )
-    LOGGER.info("Packaging docket data")
+    LOGGER.info("Job#%s: Packaging docket..", str(job_id))
     results = package_docket(data, CLIENT_ID, job_id)
     return results
 
@@ -83,5 +83,6 @@ def find_download_data(api_key, job, job_id):
                  'file_type': job['file_type'],
                  'data': data.text
                  }
+    LOGGER.info("Job#%s: Packaging downloads..", str(job_id))
     results = package_downloads(data_json, CLIENT_ID, job_id)
     return results

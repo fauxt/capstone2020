@@ -10,17 +10,26 @@ from c20_client.client_decide_call import handle_specific_job
 from c20_client.client_logger import LOGGER
 
 
+def post_job(results):
+    LOGGER.info("Packaging successful!")
+    LOGGER.info("Posting job to server")
+    requests.post('http://capstone.cs.moravian.edu:5000/return_result',
+                  json=results)
+    LOGGER.info("Job has successfully been posted!")
+
+
 def do_job(api_key):
     """
     Gets a job from the server and handles the job based on the type of job
     """
     try:
         LOGGER.info('Getting job from server...')
-        job = requests.get('http://capstone.cs.moravian.edu/get_job')
+        job = requests.get('http://capstone.cs.moravian.edu:5000/get_job')
         job = job.json()
-        LOGGER.info("Job aquired")
+        LOGGER.info("Job has been aquired")
 
     except Exception:
+        LOGGER.error("A connection error has occurred")
         raise NoConnectionError
 
     results = handle_specific_job(job, api_key)
@@ -28,11 +37,7 @@ def do_job(api_key):
     if results is None:
         return
 
-    LOGGER.info("Packaging Successful")
-    LOGGER.info("Posting data to server")
-    requests.post('http://capstone.cs.moravian.edu/return_result',
-                  json=results)
-    LOGGER.info("Data successfully posted to server!")
+    post_job(results)
 
 
 def main():
