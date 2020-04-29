@@ -22,7 +22,6 @@ def create_app(job_manager, data_repository, database):
     def _get_client_id():
         user_manager = UserManager(database)
         user_id = user_manager.get_new_user_id()
-        LOGGER.info('Sending user_id: %s', user_id)
         user_id_json = {'user_id': user_id}
         return user_id_json
 
