@@ -6,6 +6,7 @@ implementation of Job_Queue class
 import pickle
 import threading
 from c20_server import job_queue_errors
+from c20_server.server_logger import LOGGER
 
 
 class JobQueue:
@@ -23,6 +24,7 @@ class JobQueue:
         # with self.lock:
         job_from_queue = self.r_database.lpop('unassigned_jobs')
         if not job_from_queue:
+            LOGGER.error('No Job available to be done')
             raise job_queue_errors.NoJobsAvailableException
         job = pickle.loads(job_from_queue)
         return job  # job_from_queue

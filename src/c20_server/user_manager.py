@@ -1,3 +1,5 @@
+from c20_server.server_logger import LOGGER
+
 
 class UserManager:
 
@@ -16,4 +18,5 @@ class UserManager:
         self.initialize_user_ids()
         new_user_int = self.r_database.incr('user_id')
         new_user_id = 'User' + str(new_user_int)
+        LOGGER.info('Sending user_id: %s', new_user_id)
         return new_user_id
