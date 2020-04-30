@@ -50,7 +50,10 @@ def handle_jobs(json_data):
         LOGGER.error('Received wrong data format')
         return {}
 
-    json_jobs = json_data["jobs"]
+    try:
+        json_jobs = json_data["jobs"]
+    except KeyError:
+        return {}
 
     for job in json_jobs:
         job = json_to_job(job)
@@ -65,7 +68,6 @@ def json_to_job(json_job):
     Record = namedtuple('Record', 'job_id job_type')
     input_array_line = [job_id, job_type]
     record = Record(*input_array_line)
-
     return add_specific_job_data(record, json_job)
 
 
@@ -108,7 +110,3 @@ def create_download_job(record, json_job):
     file_type = json_job["file_type"]
     url = json_job["url"]
     return DownloadJob(record.job_id, folder_name, file_name, file_type, url)
-
-
-def create_none_job(record):
-    return NoneJob(record.job_id)
