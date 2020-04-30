@@ -47,8 +47,11 @@ def handle_jobs(json_data):
         json_data = json.loads(json_data)
     except TypeError:
         return {}
-
-    json_jobs = json_data["jobs"]
+    
+    try:
+        json_jobs = json_data["jobs"]
+    except KeyError:
+        return {}
 
     for job in json_jobs:
         job = json_to_job(job)
