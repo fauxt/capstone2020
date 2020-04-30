@@ -134,6 +134,15 @@ def test_single_docket_json_to_job():
     assert test_job == docket_job
 
 
+def test_none_json_to_job():
+    json_example = {
+        "job_type": "none"
+    }
+    test_job = job_translator.json_to_job(json_example)
+    docket_job = job.NoneJob(test_job[0])
+    assert test_job == docket_job
+
+
 def test_single_download_json_to_job():
     url = "https://api.data.gov/regulations/v3/download \
            ?documentId=CMS-2005-0001-0001&contentType=pdf"
@@ -306,3 +315,25 @@ def test_handle_document_return_data():
             url=url3)
     ]
     assert test_job == job_list
+
+
+def test_json_data_key_error():
+    """
+    KeyError exception is thrown when there is no jobs field
+    supplied in the json return result value from the client.
+    """
+    json_return_data = \
+        {
+            "Data": [
+                {
+                    "folder_name": "CMS/CMS-2005-0001/CMS-2005-0001-0001/",
+                    "file_name": "basic_document.json",
+                    "contents": {}
+                }
+            ]
+        }
+
+    json_return_data = json.dumps(json_return_data)
+    handled_job = job_translator.handle_jobs(json_return_data)
+
+    assert handled_job == {}
