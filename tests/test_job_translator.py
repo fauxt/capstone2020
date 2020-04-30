@@ -134,15 +134,6 @@ def test_single_docket_json_to_job():
     assert test_job == docket_job
 
 
-def test_none_json_to_job():
-    json_example = {
-        "job_type": "none"
-    }
-    test_job = job_translator.json_to_job(json_example)
-    docket_job = job.NoneJob(test_job[0])
-    assert test_job == docket_job
-
-
 def test_single_download_json_to_job():
     url = "https://api.data.gov/regulations/v3/download \
            ?documentId=CMS-2005-0001-0001&contentType=pdf"
