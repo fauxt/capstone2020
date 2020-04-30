@@ -3,6 +3,9 @@ import requests_mock
 from c20_client import get_document
 from c20_client import reggov_api_doc_error
 
+
+CLIENT_ID = 1
+JOB_ID = 1
 URL = "https://api.data.gov:443/regulations/v3/document.json?"
 DOC_ID = "EPA-HQ-OAR-2011-0028-0108"
 API_KEY = "12345"

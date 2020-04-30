@@ -1,7 +1,12 @@
 import requests_mock
 import pytest
-from c20_client.do_client_job import do_job
+from c20_client.do_client_job import do_job, handling_erorr
 from c20_client.connection_error import NoConnectionError
+from c20_client.connection_error import ServiceUnavailableError
+from c20_client.reggov_api_doc_error import IncorrectApiKeyException
+from c20_client.reggov_api_doc_error import IncorrectIDPatternException
+from c20_client.reggov_api_doc_error import BadDocIDException
+from c20_client.reggov_api_doc_error import ExceedCallLimitException
 
 CLIENT_ID = 1
 JOB_ID = 1
@@ -12,6 +17,17 @@ END_DATE = '03/06/14'
 DATE = START_DATE + '-' + END_DATE
 URL = 'https://api.data.gov/regulations/v3/download?' \
       'documentId=NBA-ABC-123&contentType=pdf'
+WRONG_DOCKETID_PATTREN_URL = 'https://api.data.gov:443/regulations/' \
+                             'v3/docket.json?api_key="VALID KEY"' \
+                             '&docketID=ASD-EPA-HQ-OAR-2011-0028-DDD"'
+NO_API_KEY_URL = 'https://api.data.gov:443/regulations/v3/' \
+                 'documents.json?api_key=' \
+                 '"&po=1000&crd=11/06/13 - 03/06/14'
+BAD_DOCUMENTID_URL = "https://api.data.gov:443/regulations/v3" \
+                     "/docket.json?api_key=VALID KEY" \
+                     "'&documentID=EPA-HQ-OAR-2011-0028-0108-0000"
+DOCUMENTS_URL = "https://api.data.gov:443/regulations/v3/document." \
+                "json?api_key=VALID KEY&po=1000&crd=11/06/13 - 03/06/14"
 
 
 def test_do_job_documents_endpoint_call():
@@ -179,3 +195,78 @@ def test_no_connection_made_to_server():
 
         with pytest.raises(NoConnectionError):
             do_job(API_KEY)
+
+
+def test_bad_request_error():
+    with requests_mock.Mocker() as mock:
+        mock.get(WRONG_DOCKETID_PATTREN_URL,
+                 status_code=400)
+
+        with pytest.raises(IncorrectIDPatternException):
+            result = handling_erorr(WRONG_DOCKETID_PATTREN_URL,
+                                    message_report=[":received 400:"
+                                                    " Bad Requests"])
+            mock.post('http://capstone.cs.moravian.edu/report_failure',
+                      json={'client_id': CLIENT_ID,
+                            'job_id': JOB_ID,
+                            'message': result})
+
+
+def test_forbidden_error():
+    with requests_mock.Mocker() as mock:
+        mock.get(NO_API_KEY_URL,
+                 status_code=403)
+
+        with pytest.raises(IncorrectApiKeyException):
+            result = handling_erorr(NO_API_KEY_URL,
+                                    message_report=[":received 403:"
+                                                    " Forbidden"])
+            mock.post('http://capstone.cs.moravian.edu/report_failure',
+                      json={'client_id': CLIENT_ID,
+                            'job_id': JOB_ID,
+                            'message': result})
+
+
+def test_not_found_error():
+    with requests_mock.Mocker() as mock:
+        mock.get(BAD_DOCUMENTID_URL,
+                 status_code=404)
+
+        with pytest.raises(BadDocIDException):
+            result = handling_erorr(BAD_DOCUMENTID_URL,
+                                    message_report=[":received 404:"
+                                                    " Not Found"])
+            mock.post('http://capstone.cs.moravian.edu/report_failure',
+                      json={'client_id': CLIENT_ID,
+                            'job_id': JOB_ID,
+                            'message': result})
+
+
+def test_too_many_requests_error():
+    with requests_mock.Mocker() as mock:
+        mock.get(DOCUMENTS_URL,
+                 status_code=429)
+
+        with pytest.raises(ExceedCallLimitException):
+            result = handling_erorr(DOCUMENTS_URL,
+                                    message_report=[":received 429:"
+                                                    " Too Many Requests"])
+            mock.post('http://capstone.cs.moravian.edu/report_failure',
+                      json={'client_id': CLIENT_ID,
+                            'job_id': JOB_ID,
+                            'message': result})
+
+
+def test_server_overloaded_error():
+    with requests_mock.Mocker() as mock:
+        mock.get(DOCUMENTS_URL,
+                 status_code=503)
+
+        with pytest.raises(ServiceUnavailableError):
+            result = handling_erorr(DOCUMENTS_URL,
+                                    message_report=[":received 503:"
+                                                    " Service Unavailable"])
+            mock.post('http://capstone.cs.moravian.edu/report_failure',
+                      json={'client_id': CLIENT_ID,
+                            'job_id': JOB_ID,
+                            'message': result})

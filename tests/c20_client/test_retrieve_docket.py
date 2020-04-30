@@ -6,6 +6,8 @@ import pytest
 from c20_client.retrieve_docket import get_docket
 from c20_client import reggov_api_doc_error
 
+CLIENT_ID = 1
+JOB_ID = 1
 URL = "https://api.data.gov:443/regulations/v3/docket.json?api_key="
 API_KEY = "VALID KEY"
 DOCKET_ID = "EPA-HQ-OAR-2011-0028"

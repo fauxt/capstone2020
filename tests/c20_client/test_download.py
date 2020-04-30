@@ -3,6 +3,9 @@ import requests_mock
 from c20_client import get_download
 from c20_client import reggov_api_doc_error
 
+CLIENT_ID = 1
+JOB_ID = 1
+
 URL = "https://api.data.gov:443/regulations/v3/download.json?" \
       "documentId=EPA-HQ-OAR-2011-0028-0108&contentType=pdf"
 BAD_URL = "https://api.data.gov:443/regulations/v3/download.json?" \
