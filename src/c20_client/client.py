@@ -1,11 +1,11 @@
 """
 Gets a job from the server and handles the job based on the type of job
 """
-import argparse
 import requests
 from c20_client.connection_error import NoConnectionError
 
 from c20_client.client_decide_call import handle_specific_job
+from c20_client.get_client_id import ClientManager
 
 from c20_client.client_logger import LOGGER
 
@@ -18,7 +18,7 @@ def post_job(results):
     LOGGER.info("Job has successfully been posted!")
 
 
-def do_job(api_key):
+def do_job(manager):
     """
     Gets a job from the server and handles the job based on the type of job
     """
@@ -32,7 +32,7 @@ def do_job(api_key):
         LOGGER.error("A connection error has occurred")
         raise NoConnectionError
 
-    results = handle_specific_job(job, api_key)
+    results = handle_specific_job(job, manager)
 
     if results is None:
         return
@@ -41,11 +41,11 @@ def do_job(api_key):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="get files from regulations.gov")
-    parser.add_argument("API_key", help="api key for regulations.gov")
-    args = parser.parse_args()
-    do_job(args.API_key)
+    """
+    Run the program
+    """
+    manager = ClientManager()
+    do_job(manager)
 
 
 if __name__ == '__main__':
