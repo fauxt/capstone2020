@@ -66,8 +66,6 @@ def json_to_job(json_job):
     Record = namedtuple('Record', 'job_id job_type')
     input_array_line = [job_id, job_type]
     record = Record(*input_array_line)
-    if record.job_type == NONE_JOB:
-        return create_none_job(record)
     return add_specific_job_data(record, json_job)
 
 
@@ -110,7 +108,3 @@ def create_download_job(record, json_job):
     file_type = json_job["file_type"]
     url = json_job["url"]
     return DownloadJob(record.job_id, folder_name, file_name, file_type, url)
-
-
-def create_none_job(record):
-    return NoneJob(record.job_id)
