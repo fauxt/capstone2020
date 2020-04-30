@@ -37,7 +37,7 @@ class JobManager:
         self.job_queue.add_job(job)
 
     def reset_stale_job(self, time_to_expire):
-        for user in self.r_database.hgetall('assigned_jobs'):
+        for user in self.in_progress_jobs.get_all_assigned_jobs():
             job_info = self.r_database.hget('assigned_jobs', user)
             time_, job = pickle.loads(job_info)
             if time_ < time_to_expire:
