@@ -60,7 +60,7 @@ File: document.json
           "agency": "Environmental Protection Agency",
           "agencyAcronym": "EPA",
           "cfrCitation": "40 CFR 98",
-        
+
           ...
 
           "internationalImpacts": {
@@ -78,9 +78,9 @@ File: document.json
   * Returns data concerning a document
   * Placed as a json file in the DocumentID folder
   * `jobs` field can contain a list of download jobs
-  * Note: `file_name` are retrieved from regulations.gov, not always the document_id 
+  * Note: `file_name` are retrieved from regulations.gov, not always the document_id
   * Note: If there are `attachments` then we can find `fileFormats` in the attachments.
-  If there are no `attachments` then `fileFormats`can be retrieved from the json directly 
+  If there are no `attachments` then `fileFormats`can be retrieved from the json directly
 
 ```
 {
@@ -98,7 +98,7 @@ File: document.json
           "allowLateComment": false,
           "commentDueDate": null,
           "effectiveDate": "2014-01-01T00:00:00-05:00",
-          
+
           ...
 
           "numItemsRecieved": {
@@ -112,7 +112,7 @@ File: document.json
         }
       }
     }
-  ] 
+  ]
   'jobs': [
     {
       'job_type': 'download',
@@ -163,7 +163,7 @@ File: document.json
         "title": "Medicare Program; Revised Civil Money Penalties, Assessments, Exclusions, and Related Appeals Procedures"
       }
     },
-    
+
               ...
 
     {
@@ -195,7 +195,7 @@ File: document.json
       'job_type': 'docket'
       'docket_id': 'EPA-HQ-OAR-2011-0028'
     },
-    
+
     ...
 
     {
@@ -209,10 +209,10 @@ File: document.json
 * Downloads
   * Returns basic data concerning a download
   * The file is placed as a json file in the DocumentID folder
-  * Note: `file_name` are retrieved from regulations.gov, not always the document_id 
+  * Note: `file_name` are retrieved from regulations.gov, not always the document_id
   * The file is sent in parallel with the json data, but separate from the JSON data
 
- 
+
 ```
 {
   'client_id': 'client1',
@@ -224,3 +224,146 @@ File: document.json
     }
   ]
 }
+```
+##Client report failure
+
+a POST request is invoked by the client to the server. It returns a JSON file with information like client_id, job_id, and Message to return failure endpoint in the server. The client can return a failure due to many reasons such as:
+* 400: Bad request
+* 401: Unauthorized
+* 404: Not found
+* 408: Request Timeout
+* 480: Temporarily Unavailable
+
+
+## JSON file definition
+
+* `client_id`: A unique identifier of the client returning the result.
+* `job_id`: ID of the current job object.
+
+* `Message`: a string list contains the URL of failure job and the description of the error.
+
+
+## Examples for failure jobs
+### Docket:
+
+* bad docketID:
+
+ docketID="EPA-HQ-OAR-2011-0028-0000"
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/
+      regulations/v3/docket.json?
+      api_key="VALID KEY"&docketID=
+      EPA-HQ-OAR-2011-0028-0000'
+    :received 404:Not Found'
+    }
+```
+
+* wrong docketID pattern:
+
+ docketID=ASD-EPA-HQ-OAR-2011-0028-DDD
+
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/
+      regulations/v3/docket.json?
+      api_key="VALID KEY"&docketID=ASD-EPA-HQ-OAR-2011-0028-DDD'
+      :received 400:Bad request'
+    }
+```
+* bad api kay :
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/
+      regulations/v3/docket.json?
+      api_key="INVALID"&docketID=ASD-EPA-HQ-OAR-2011-0028-DDD'
+      :received 403:Forbidden'
+    }
+```
+
+### Document:
+
+* bad documentID:
+ documentID="EPA-HQ-OAR-2011-0028-0108-0000"
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/
+      regulations/v3/docket.json?
+      api_key="VALID KEY"&documentID=
+      EPA-HQ-OAR-2011-0028-0108-0000'
+    :received 404:Not Found'
+    }
+```
+* Overused api key:
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/regulations/v3/document.json?api_key=VALID KEY"&po=1000&crd=11/06/13 - 03/06/14'
+    :received 429:Too Many Requests'
+    }
+```
+
+
+
+### Documents:
+* Bad URL:
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/regulations/v3/document.json?api_key=VALID KEY"&po=1000&crd=11/06/13 - 03/06/14'
+    :received 404:Not Found'
+    }
+```
+
+* No api key:
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/regulations/v3/documents.json?api_key="&po=1000&crd=11/06/13 - 03/06/14'
+    :received 403:Forbidden'
+    }
+```
+
+* Overused api key:
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':''URL:https://api.data.gov:443/regulations/v3/documents.json?api_key=VALID KEY"&po=1000&crd=11/06/13 - 03/06/14'
+    :received 429:Too Many Requests'
+    }
+```
+
+### Errors connections:
+
+###### 1-  503 Service Unavailable:
+ * 503 Service Unavailable:
+It occurs when the client try to connect to the server but the server is overloaded or under maintenance.
+
+```
+    {
+      'client_id': 'client14',
+      'job_id': 'job33',
+      'Message':'URL:https://api.data.gov:443/regulations/v3/documents.json?api_key=VALID KEY"&po=1000&crd=11/06/13 - 03/06/14'
+               :received 503: Service Unavailable'
+    }
+```
