@@ -47,7 +47,7 @@ def handle_jobs(json_data):
         json_data = json.loads(json_data)
     except TypeError:
         return {}
-    
+
     try:
         json_jobs = json_data["jobs"]
     except KeyError:
@@ -66,7 +66,8 @@ def json_to_job(json_job):
     Record = namedtuple('Record', 'job_id job_type')
     input_array_line = [job_id, job_type]
     record = Record(*input_array_line)
-
+    if record.job_type == NONE_JOB:
+        return create_none_job(record)
     return add_specific_job_data(record, json_job)
 
 
