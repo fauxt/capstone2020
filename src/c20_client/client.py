@@ -31,11 +31,18 @@ def do_job(api_key):
     LOGGER.info("Packaging Successful")
     LOGGER.info("Posting data to server")
     if job['job_type'] == 'download':
-        file = [('document', (results['data'][0]['file_name'],
-                              results['data'][0]['data'],
-                              results['data'][0]['folder_name']))]
-        requests.post('http://capstone.cs.moravian.edu/return_result',
-                      files=file)
+        file = {'file': (results['data'][0]['file_name'], results['data'][0]['data']) }
+        data = {
+            'client_id': results['client_id'],
+            'job_id': results['job_id'],
+            'file_name': results['data'][0]['file_name'],
+            'folder_name': results['data'][0]['folder_name']
+        }
+        #file = [('document', (results['data'][0]['file_name'],
+        #                      results['data'][0]['data'],
+        #                     results['data'][0]['folder_name']))]
+        requests.post('http://capstone.cs.moravian.edu/return_file',
+                      files=file, data=data)
     else:
         requests.post('http://capstone.cs.moravian.edu/return_result',
                       json=results)
