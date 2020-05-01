@@ -1,7 +1,7 @@
 import pytest
 from c20_client import document_packager
 
-CLIENT_ID = 1
+CLIENT_ID = '1'
 JOB_ID = 1
 
 TEST_JSON = {

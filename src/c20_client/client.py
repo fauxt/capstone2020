@@ -1,17 +1,17 @@
 """
 Gets a job from the server and handles the job based on the type of job
 """
-import argparse
 
 from c20_client.do_client_job import do_multiple_job
+from c20_client.get_client_id import ClientManager
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="get files from regulations.gov")
-    parser.add_argument("API_key", help="api key for regulations.gov")
-    args = parser.parse_args()
-    do_multiple_job(args.API_key)
+    """
+    Run the program
+    """
+    manager = ClientManager()
+    do_multiple_job(manager)
 
 
 if __name__ == '__main__':
