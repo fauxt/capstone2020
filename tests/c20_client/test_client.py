@@ -32,22 +32,23 @@ BAD_DOCUMENTID_URL = "https://api.data.gov:443/regulations/v3" \
 DOCUMENTS_URL = "https://api.data.gov:443/regulations/v3/document." \
                 "json?api_key=VALID KEY&po=1000&crd=11/06/13 - 03/06/14"
 
+
 @pytest.fixture(name="manager")
 def fixture_client_manager_unset(mocker):
-    with requests_mock.Mocker() as mock:
-        mock.get('http://capstone.cs.moravian.edu:5000/get_user_id',
-                 json={'user_id': CLIENT_ID})
+    with requests_mock.Mocker() as mockr:
+        mockr.get('http://capstone.cs.moravian.edu:5000/get_user_id',
+                  json={'user_id': CLIENT_ID})
         mocker.patch('c20_client.get_client_id.open', mock_open())
 
         manager = ClientManager()
 
         # Delete the environment variable if it is loaded
-        if getenv('CLIENT_ID') is not None:
-            del environ['CLIENT_ID']
-
-        # Delete the environment variable if it is loaded
         if getenv('API_KEY') is not None:
             del environ['API_KEY']
+
+        # Delete the environment variable if it is loaded
+        if getenv('CLIENT_ID') is not None:
+            del environ['CLIENT_ID']
 
         environ['API_KEY'] = API_KEY
         environ['CLIENT_ID'] = CLIENT_ID
@@ -224,7 +225,7 @@ def test_no_connection_made_to_server(manager):
             do_job(manager)
 
 
-def test_bad_request_error(manager):
+def test_bad_request_error():
     with requests_mock.Mocker() as mock:
         mock.get(WRONG_DOCKETID_PATTREN_URL,
                  status_code=400)
@@ -239,7 +240,7 @@ def test_bad_request_error(manager):
                             'message': result})
 
 
-def test_forbidden_error(manager):
+def test_forbidden_error():
     with requests_mock.Mocker() as mock:
         mock.get(NO_API_KEY_URL,
                  status_code=403)
@@ -254,7 +255,7 @@ def test_forbidden_error(manager):
                             'message': result})
 
 
-def test_not_found_error(manager):
+def test_not_found_error():
     with requests_mock.Mocker() as mock:
         mock.get(BAD_DOCUMENTID_URL,
                  status_code=404)
@@ -269,7 +270,7 @@ def test_not_found_error(manager):
                             'message': result})
 
 
-def test_too_many_requests_error(manager):
+def test_too_many_requests_error():
     with requests_mock.Mocker() as mock:
         mock.get(DOCUMENTS_URL,
                  status_code=429)
@@ -284,7 +285,7 @@ def test_too_many_requests_error(manager):
                             'message': result})
 
 
-def test_server_overloaded_error(manager):
+def test_server_overloaded_error():
     with requests_mock.Mocker() as mock:
         mock.get(DOCUMENTS_URL,
                  status_code=503)

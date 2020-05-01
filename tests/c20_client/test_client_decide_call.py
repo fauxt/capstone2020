@@ -1,6 +1,6 @@
 from os import getenv, environ
-import requests_mock
 from unittest.mock import mock_open
+import requests_mock
 import pytest
 from c20_client import client_decide_call
 from c20_client.get_client_id import ClientManager
@@ -71,6 +71,7 @@ DOWNLOAD_JOB = {
         'documentId=EPA-HQ-OAR-2011-0028-0108&contentType=pdf'
 }
 
+
 @pytest.fixture(name="manager")
 def fixture_client_manager_unset(mocker):
     with requests_mock.Mocker() as mock:
@@ -84,11 +85,11 @@ def fixture_client_manager_unset(mocker):
         if getenv('CLIENT_ID') is not None:
             del environ['CLIENT_ID']
 
+        environ['CLIENT_ID'] = '1'
         # Delete the environment variable if it is loaded
         if getenv('API_KEY') is not None:
             del environ['API_KEY']
 
-        environ['CLIENT_ID'] = '1'
         environ['API_KEY'] = API_KEY
         # Start with both keys as None
         manager.reset_keys()
