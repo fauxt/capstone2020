@@ -20,30 +20,25 @@ def create_app(job_manager, data_repository, database):
 
     @app.route('/get_user_id')
     def _get_client_id():
-        user_manager = UserManager(database)
-        user_id = user_manager.get_new_user_id()
-        user_id_json = {'user_id': user_id}
+        user_id_json = {'user_id': UserManager(database).get_new_user_id()}
         return user_id_json
 
     @app.route('/get_job')
     def _get_job():
         LOGGER.info('Requesting Job From Job Queue...')
-        requested_job = job_manager.request_job(User(100))
-        job = job_to_json(requested_job)
+        job = remove_downloads(job_manager)
         LOGGER.info('Sending Job to user...')
         return job
 
     @app.route('/return_result', methods=['POST'])
     def _return_result():
         LOGGER.info('Receiving Data from user...')
-        client_data = request.json
-        print(client_data)
-        if client_data is None:
+        if request.json is None:
             LOGGER.error('No Data received to be saved')
             return {}, 400
 
-        update_job_manager(job_manager, client_data)
-        save_data(data_repository, client_data['data'])
+        update_job_manager(job_manager, request.json)
+        save_data(data_repository, request.json['data'])
 
         return {}, 200
 
@@ -56,6 +51,16 @@ def create_app(job_manager, data_repository, database):
         return {}, 200
 
     return app
+
+
+def remove_downloads(job_manager):
+    requested_job = job_manager.request_job(User(100))
+    job = job_to_json(requested_job)
+    while json.loads(job)['job_type'] == 'download':
+        job_manager.report_failure(User(100))
+        requested_job = job_manager.request_job(User(100))
+        job = job_to_json(requested_job)
+    return job
 
 
 def update_job_manager(job_manager, client_data):
