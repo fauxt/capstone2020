@@ -44,7 +44,7 @@ class ClientManager():
         """
         try:
             response = requests.get(
-                'http://capstone.cs.moravian.edu/get_user_id')
+                'http://capstone.cs.moravian.edu:5000/get_user_id')
         except Exception:
             raise NoConnectionError
 

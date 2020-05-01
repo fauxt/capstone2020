@@ -306,3 +306,25 @@ def test_handle_document_return_data():
             url=url3)
     ]
     assert test_job == job_list
+
+
+def test_json_data_key_error():
+    """
+    KeyError exception is thrown when there is no jobs field
+    supplied in the json return result value from the client.
+    """
+    json_return_data = \
+        {
+            "Data": [
+                {
+                    "folder_name": "CMS/CMS-2005-0001/CMS-2005-0001-0001/",
+                    "file_name": "basic_document.json",
+                    "contents": {}
+                }
+            ]
+        }
+
+    json_return_data = json.dumps(json_return_data)
+    handled_job = job_translator.handle_jobs(json_return_data)
+
+    assert handled_job == {}

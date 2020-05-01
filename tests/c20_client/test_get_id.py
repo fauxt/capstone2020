@@ -14,7 +14,7 @@ API_KEY = 'xxxx-xyz-xxxx'
 @pytest.fixture(name="manager")
 def fixture_client_manager_unset(mocker):
     with requests_mock.Mocker() as mock:
-        mock.get('http://capstone.cs.moravian.edu/get_user_id',
+        mock.get('http://capstone.cs.moravian.edu:5000/get_user_id',
                  json={'user_id': CLIENT_ID})
         mocker.patch('c20_client.get_client_id.open', mock_open())
 
@@ -36,7 +36,7 @@ def fixture_client_manager_unset(mocker):
 
 def test_request_id_call(manager):
     with requests_mock.Mocker() as mock:
-        mock.get('http://capstone.cs.moravian.edu/get_user_id',
+        mock.get('http://capstone.cs.moravian.edu:5000/get_user_id',
                  json={'user_id': CLIENT_ID})
 
         client_id = manager.request_id()
@@ -63,7 +63,7 @@ def test_id_not_exist_in_env(manager):
 
 def tests_check_not_in_environment(mocker, manager):
     with requests_mock.Mocker() as mock:
-        mock.get('http://capstone.cs.moravian.edu/get_user_id',
+        mock.get('http://capstone.cs.moravian.edu:5000/get_user_id',
                  json={'user_id': CLIENT_ID})
         file_mock = mocker.patch('c20_client.get_client_id.open', mock_open())
 
@@ -87,7 +87,7 @@ def test_id_exist_in_environment(manager):
 
 def tests_check_in_environment(manager):
     with requests_mock.Mocker() as mock:
-        mock.get('http://capstone.cs.moravian.edu/get_user_id',
+        mock.get('http://capstone.cs.moravian.edu:5000/get_user_id',
                  json={'user_id': CLIENT_ID})
 
         environ['CLIENT_ID'] = CLIENT_ID

@@ -4,6 +4,7 @@ Implementation of In-Progress class
 import pickle
 import time
 from c20_server import job_queue_errors
+from c20_server.server_logger import LOGGER
 
 
 class InProgress:
@@ -17,6 +18,7 @@ class InProgress:
 
     def unassign(self, user_id):
         if not self.r_database.hexists('assigned_jobs', user_id):
+            LOGGER.error('The user#%s is invalid', user_id)
             raise job_queue_errors.UnassignInvalidDataException
         job = self.r_database.hget('assigned_jobs', user_id)
         self.r_database.hdel('assigned_jobs', user_id)

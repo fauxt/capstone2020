@@ -1,5 +1,6 @@
 
 from collections import namedtuple
+from c20_server.server_logger import LOGGER
 
 Data = namedtuple('Data', ['folder_name', 'file_name', 'contents'])
 
@@ -20,5 +21,6 @@ class DataExtractor:
                                 file_name=data_item['file_name'],
                                 contents=data_item['data']))
             except TypeError:
+                LOGGER.error('Missing Data to be saved into the disk')
                 raise MissingDataException()
         return ret

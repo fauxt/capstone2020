@@ -13,5 +13,4 @@ def package_downloads(download_job, client_id, job_id):
         'job_id': job_id,
         'data': data,
     }
-    print(return_download)
     return return_download
