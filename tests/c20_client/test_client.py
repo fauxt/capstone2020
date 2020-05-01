@@ -1,10 +1,12 @@
+from os import getenv, environ
 import requests_mock
-
+from unittest.mock import mock_open
 import pytest
 from c20_client.client import do_job
 from c20_client.connection_error import NoConnectionError
+from c20_client.get_client_id import ClientManager
 
-CLIENT_ID = 1
+CLIENT_ID = '1'
 JOB_ID = 1
 API_KEY = ''
 OFFSET = '1000'
@@ -14,8 +16,32 @@ DATE = START_DATE + '-' + END_DATE
 URL = 'https://api.data.gov/regulations/v3/download?' \
       'documentId=NBA-ABC-123&contentType=pdf'
 
+@pytest.fixture(name="manager")
+def fixture_client_manager_unset(mocker):
+    with requests_mock.Mocker() as mock:
+        mock.get('http://capstone.cs.moravian.edu/get_user_id',
+                 json={'user_id': CLIENT_ID})
+        mocker.patch('c20_client.get_client_id.open', mock_open())
 
-def test_do_job_documents_endpoint_call():
+        manager = ClientManager()
+
+        # Delete the environment variable if it is loaded
+        if getenv('CLIENT_ID') is not None:
+            del environ['CLIENT_ID']
+
+        # Delete the environment variable if it is loaded
+        if getenv('API_KEY') is not None:
+            del environ['API_KEY']
+
+        environ['API_KEY'] = API_KEY
+        environ['CLIENT_ID'] = CLIENT_ID
+        # Start with both keys as None
+        manager.reset_keys()
+
+        return manager
+
+
+def test_do_job_documents_endpoint_call(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  json={'job_type': 'documents', "page_offset": OFFSET,
@@ -51,7 +77,7 @@ def test_do_job_documents_endpoint_call():
                         'data': data,
                         'jobs': job})
 
-        do_job(API_KEY)
+        do_job(manager)
         history = mock.request_history
 
         assert len(history) == 3
@@ -60,7 +86,7 @@ def test_do_job_documents_endpoint_call():
         assert 'capstone' in history[2].url
 
 
-def test_do_job_document_endpoint_call():
+def test_do_job_document_endpoint_call(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  json={'job_type': 'document', 'job_id': JOB_ID,
@@ -87,7 +113,7 @@ def test_do_job_document_endpoint_call():
                         'data': data,
                         'jobs': jobs})
 
-        do_job(API_KEY)
+        do_job(manager)
         history = mock.request_history
 
         assert len(history) == 3
@@ -96,7 +122,7 @@ def test_do_job_document_endpoint_call():
         assert 'capstone' in history[2].url
 
 
-def test_do_job_docket_endpoint_call():
+def test_do_job_docket_endpoint_call(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  json={'job_type': 'docket', 'job_id': JOB_ID,
@@ -119,7 +145,7 @@ def test_do_job_docket_endpoint_call():
                         'job_id': JOB_ID,
                         'data': data})
 
-        do_job(API_KEY)
+        do_job(manager)
         history = mock.request_history
 
         assert len(history) == 3
@@ -128,7 +154,7 @@ def test_do_job_docket_endpoint_call():
         assert 'capstone' in history[2].url
 
 
-def test_do_job_download_endpoint_call():
+def test_do_job_download_endpoint_call(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  json={'job_type': 'download', 'job_id': JOB_ID,
@@ -152,7 +178,7 @@ def test_do_job_download_endpoint_call():
                         'job_id': JOB_ID,
                         'data': data})
 
-        do_job(API_KEY)
+        do_job(manager)
         history = mock.request_history
 
         assert len(history) == 3
@@ -161,22 +187,22 @@ def test_do_job_download_endpoint_call():
         assert 'capstone' in history[2].url
 
 
-def test_do_job_none_job():
+def test_do_job_none_job(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  json={'job_type': 'none', 'job_id': JOB_ID,
                        })
-        do_job(API_KEY)
+        do_job(manager)
         history = mock.request_history
 
         assert len(history) == 1
         assert 'capstone' in history[0].url
 
 
-def test_no_connection_made_to_server():
+def test_no_connection_made_to_server(manager):
     with requests_mock.Mocker() as mock:
         mock.get('http://capstone.cs.moravian.edu/get_job',
                  exc=True)
 
         with pytest.raises(NoConnectionError):
-            do_job(API_KEY)
+            do_job(manager)
