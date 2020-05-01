@@ -57,6 +57,10 @@ def create_app(job_manager, data_repository, database):
     return app
 
 
+# This function puts the download jobs back into the queue so that a file can
+#   never be returned to the server
+# This should be changed in the future so that the server downloads
+#   the file and saves it to disk
 def remove_downloads(job_manager):
     requested_job = job_manager.request_job(User(100))
     job = job_to_json(requested_job)
