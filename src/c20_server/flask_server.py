@@ -20,7 +20,9 @@ def create_app(job_manager, data_repository, database):
 
     @app.route('/get_user_id')
     def _get_client_id():
-        user_id_json = {'user_id': UserManager(database).get_new_user_id()}
+        user_manager = UserManager(database)
+        user_id = user_manager.get_new_user_id()
+        user_id_json = {'user_id': user_id}
         return user_id_json
 
     @app.route('/get_job')
@@ -33,12 +35,14 @@ def create_app(job_manager, data_repository, database):
     @app.route('/return_result', methods=['POST'])
     def _return_result():
         LOGGER.info('Receiving Data from user...')
-        if request.json is None:
+        client_data = request.json
+        print(client_data)
+        if client_data is None:
             LOGGER.error('No Data received to be saved')
             return {}, 400
 
-        update_job_manager(job_manager, request.json)
-        save_data(data_repository, request.json['data'])
+        update_job_manager(job_manager, client_data)
+        save_data(data_repository, client_data['data'])
 
         return {}, 200
 
