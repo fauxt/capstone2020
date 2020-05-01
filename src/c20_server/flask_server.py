@@ -28,8 +28,7 @@ def create_app(job_manager, data_repository, database):
     @app.route('/get_job')
     def _get_job():
         LOGGER.info('Requesting Job From Job Queue...')
-        requested_job = job_manager.request_job(User(100))
-        job = job_to_json(requested_job)
+        job = remove_downloads(job_manager)
         LOGGER.info('Sending Job to user...')
         return job
 
@@ -56,6 +55,20 @@ def create_app(job_manager, data_repository, database):
         return {}, 200
 
     return app
+
+
+# This function puts the download jobs back into the queue so that a file can
+#   never be returned to the server
+# This should be changed in the future so that the server downloads
+#   the file and saves it to disk
+def remove_downloads(job_manager):
+    requested_job = job_manager.request_job(User(100))
+    job = job_to_json(requested_job)
+    while json.loads(job)['job_type'] == 'download':
+        job_manager.report_failure(User(100))
+        requested_job = job_manager.request_job(User(100))
+        job = job_to_json(requested_job)
+    return job
 
 
 def update_job_manager(job_manager, client_data):
