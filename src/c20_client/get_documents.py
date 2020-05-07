@@ -12,7 +12,7 @@ def get_documents_data(api_key, offset, date):
     """
     LOGGER.info('Requesting document from regulations.gov')
     response = requests.get('https://api.data.gov:443/regulations' +
-                            '/v3/documents.json?api_key=' + api_key +
+                            '/v3/documents.json?rpp=1000&api_key=' + api_key +
                             '&po=' + str(offset) + '&crd=' + date)
 
     check_status(response.status_code)

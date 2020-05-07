@@ -4,6 +4,7 @@ from collections import namedtuple
 from c20_server import job_translator_errors
 from c20_server.job import\
     DocumentsJob, DocumentJob, DocketJob, DownloadJob, NoneJob
+from c20_server.server_logger import LOGGER
 
 DOCUMENTS = "documents"
 DOCUMENT = "document"
@@ -46,9 +47,13 @@ def handle_jobs(json_data):
     try:
         json_data = json.loads(json_data)
     except TypeError:
+        LOGGER.error('Received wrong data format')
         return {}
 
-    json_jobs = json_data["jobs"]
+    try:
+        json_jobs = json_data["jobs"]
+    except KeyError:
+        return {}
 
     for job in json_jobs:
         job = json_to_job(job)
@@ -63,7 +68,6 @@ def json_to_job(json_job):
     Record = namedtuple('Record', 'job_id job_type')
     input_array_line = [job_id, job_type]
     record = Record(*input_array_line)
-
     return add_specific_job_data(record, json_job)
 
 
@@ -79,7 +83,7 @@ def add_specific_job_data(record, json_job):
 
     if record.job_type == DOWNLOAD:
         return create_download_job(record, json_job)
-
+    LOGGER.error('Attempted to Add an unrecognized Job type to the JobQueue')
     raise job_translator_errors.UnrecognizedJobTypeException
 
 
@@ -106,7 +110,3 @@ def create_download_job(record, json_job):
     file_type = json_job["file_type"]
     url = json_job["url"]
     return DownloadJob(record.job_id, folder_name, file_name, file_type, url)
-
-
-def create_none_job(record):
-    return NoneJob(record.job_id)

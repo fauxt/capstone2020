@@ -87,7 +87,7 @@ The JSON also includes relevant data, as defined in the "Job Classes" section, a
   "job_id": "123abc"
   "job_type": "download"
   "folder_name": "abc/abc-123/abc-123-xyz/"
-  "file_name": "title_of_file.pdf"
+  "file_name": "title_of_file"
   "file_type": "pdf"
   "url": 
       "https://api.data.gov/regulations/v3/download?documentId=EPA-HQ-OAR-2011-0028-0108&contentType=pdf"

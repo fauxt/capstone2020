@@ -13,7 +13,7 @@ from c20_client.client_logger import LOGGER
 CLIENT_ID = '1'
 
 
-def handle_specific_job(job, api_key):
+def handle_specific_job(job, manager):
     """
     Makes request to correct endpoint at reg.gov
     """
@@ -21,16 +21,16 @@ def handle_specific_job(job, api_key):
     job_type = job['job_type']
 
     if job_type == 'documents':
-        results = find_documents_data(api_key, job, job_id)
+        results = find_documents_data(manager, job, job_id)
 
     elif job_type == 'document':
-        results = find_document_data(api_key, job, job_id)
+        results = find_document_data(manager, job, job_id)
 
     elif job_type == 'docket':
-        results = find_docket_data(api_key, job, job_id)
+        results = find_docket_data(manager, job, job_id)
 
     elif job_type == 'download':
-        results = find_download_data(api_key, job, job_id)
+        results = find_download_data(manager, job, job_id)
 
     elif job_type == 'none':
         return None
@@ -38,44 +38,44 @@ def handle_specific_job(job, api_key):
     return results
 
 
-def find_documents_data(api_key, job, job_id):
+def find_documents_data(manager, job, job_id):
     print("Getting documents from regulations.gov...\n")
     data = get_documents(
-        api_key,
+        manager.api_key,
         job["page_offset"],
         job["start_date"],
         job["end_date"])
-    LOGGER.info("Packaging documents data")
-    results = package_documents(data, CLIENT_ID, job_id)
+    LOGGER.info("Job#%s: Packaging documents...", str(job_id))
+    results = package_documents(data, manager.client_id, job_id)
     return results
 
 
-def find_document_data(api_key, job, job_id):
+def find_document_data(manager, job, job_id):
     print("Getting document from regulations.gov...\n")
     data = download_document(
-        api_key,
+        manager.api_key,
         job['document_id']
     )
-    LOGGER.info("Packaging document data")
-    results = package_document(data, CLIENT_ID, job_id)
+    LOGGER.info("Job#%s: Packaging document...", str(job_id))
+    results = package_document(data, manager.client_id, job_id)
     return results
 
 
-def find_docket_data(api_key, job, job_id):
+def find_docket_data(manager, job, job_id):
     print("Getting docket from regulations.gov...\n")
     data = get_docket(
-        api_key,
+        manager.api_key,
         job['docket_id']
     )
-    LOGGER.info("Packaging docket data")
-    results = package_docket(data, CLIENT_ID, job_id)
+    LOGGER.info("Job#%s: Packaging docket..", str(job_id))
+    results = package_docket(data, manager.client_id, job_id)
     return results
 
 
-def find_download_data(api_key, job, job_id):
+def find_download_data(manager, job, job_id):
     print("Getting download from regulations.gov...\n")
     data = download_file(
-        api_key,
+        manager.api_key,
         job['url']
     )
     data_json = {'folder_name': job['folder_name'],
@@ -83,5 +83,6 @@ def find_download_data(api_key, job, job_id):
                  'file_type': job['file_type'],
                  'data': data.content
                  }
-    results = package_downloads(data_json, CLIENT_ID, job_id)
+    LOGGER.info("Job#%s: Packaging downloads..", str(job_id))
+    results = package_downloads(data_json, manager.client_id, job_id)
     return results
